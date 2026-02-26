@@ -35,11 +35,11 @@ impl Database {
   
   pub fn query_distance(&self, distance: i32) -> anyhow::Result<i32> {
     let mut statement = self.prepare_distance_query()?;
-    statement.bind((1, distance.into()))?;
+    statement.bind::<(usize, &str)>((1, distance.to_string().as_str()))?;
     
     let response = statement.next()?;
     if let State::Row = response {
-      Ok(statement.read::<String, _>("rpm")?.into())
+      Ok(statement.read::<String, _>("rpm")?.parse()?)
     } else {
       Err(anyhow::Error::msg("No data"))
     }
